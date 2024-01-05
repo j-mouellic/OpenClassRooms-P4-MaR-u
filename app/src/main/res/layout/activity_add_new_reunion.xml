@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="com.example.p4_mareunion.viewmodel.ReunionViewModel" />
+    </data>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".AddNewReunionActivity"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <DatePicker
+            android:id="@+id/datePickerReunion"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:datePickerMode="spinner"
+            android:calendarViewShown="false"
+            android:day="@={viewModel.dayInput}"
+            android:month="@={viewModel.monthInput}"
+            android:year="@={viewModel.yearInput}" />
+
+        <TimePicker
+            android:id="@+id/timePickerReunion"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:timePickerMode="spinner"
+            android:hour="@={viewModel.hourInput}"
+            android:minute="@={viewModel.minuteInput}"/>
+
+
+
+        <MultiAutoCompleteTextView
+            android:id="@+id/multiSelectionRooms"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@={viewModel.localisationInput}"
+            android:hint="Salle de réunion"
+            android:completionThreshold="1"/>
+
+        <EditText
+            android:id="@+id/subjectReunionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:ems="10"
+            android:hint="Sujet de la réunion"
+            android:text="@={viewModel.subjectInput}"
+            android:inputType="text"/>
+
+        <MultiAutoCompleteTextView
+            android:id="@+id/multiAutoCompleteTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@={viewModel.participantsInput}"
+            android:hint="Liste des participants"
+            android:completionThreshold="1"/>
+
+
+
+        <TextView
+            android:id="@+id/saveButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_valide_shape"
+            android:padding="12dp"
+            android:text="Enregistrer"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="16dp"
+            android:textStyle="bold"
+            android:onClick="addNewReunion" />
+
+
+    </LinearLayout>
+
+</layout>
