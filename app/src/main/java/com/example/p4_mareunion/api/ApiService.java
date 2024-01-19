@@ -10,4 +10,6 @@ public interface ApiService {
     List<Reunion> getReunions();
 
     List<String> getParticipants();
+
+    List<String> getRooms();
 }

@@ -5,5 +5,16 @@
         android:id="@+id/menu_activity_main_filter"
         android:icon="@drawable/icon_filter_list_24"
         app:showAsAction="ifRoom"
-        android:title="filter"/>
+        android:title="filter">
+        <menu>
+            <item
+                android:id="@+id/sub_item_filtrer"
+                app:showAsAction="ifRoom"
+                android:title="Filtrer les réunions"/>
+            <item
+                android:id="@+id/sub_item_reinitialiser"
+                app:showAsAction="ifRoom"
+                android:title="Réinitialiser les filtres"/>
+        </menu>
+    </item>
 </menu>

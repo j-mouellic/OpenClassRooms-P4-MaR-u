@@ -16,7 +16,7 @@
             android:exported="false"
             android:theme="@style/AppThemeWithoutActionBar"/>
         <activity
-            android:name=".MainActivity"
+            android:name=".ReunionListActivity"
             android:theme="@style/AppTheme"
             android:exported="true">
             <intent-filter>

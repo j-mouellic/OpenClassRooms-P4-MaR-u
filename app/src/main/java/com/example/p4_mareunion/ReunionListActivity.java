@@ -3,7 +3,6 @@ package com.example.p4_mareunion;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.util.Pair;
 import androidx.databinding.DataBindingUtil;
@@ -12,7 +11,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -24,7 +22,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.DatePicker;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.PopupWindow;
 import android.widget.Spinner;
@@ -42,13 +39,12 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class MainActivity extends AppCompatActivity implements ItemClickListener {
+public class ReunionListActivity extends AppCompatActivity implements ItemClickListener {
 
     private ActivityMainBinding mainBinding;
     private RecyclerView recyclerView;
@@ -57,8 +53,8 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     private ReunionListAdapter reunionAdapter;
     private ReunionViewModel reunionViewModel;
     private TextView textResultDate, btnSelectDate;
-
     private String startDateString, endDateString;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +76,6 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         layout = findViewById(R.id.constraintLayout);
         recyclerView = mainBinding.reunionRecyclerView;
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-
 
         // ViewModel
         reunionViewModel = new ViewModelProvider(this).get(ReunionViewModel.class);
@@ -109,6 +103,13 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
     }
 
     @Override
+    public void onClickDeleteReunion(Reunion reunion) {
+        reunionViewModel.deleteReunion(reunion);
+    }
+
+
+    //region ----- Fonctions liées au Menu
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_filter_options, menu);
         return true;
@@ -116,16 +117,32 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        createAndShowPopUpFilter();
+        if (item.getItemId() == R.id.sub_item_filtrer) {
+            createAndShowPopUpFilter();
+            return true;
+        } else if (item.getItemId() == R.id.sub_item_reinitialiser) {
+            reunionViewModel.resetFilterShowFullReunionList();
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
-
-    @Override
-    public void onClickDeleteReunion(Reunion reunion) {
-        reunionViewModel.deleteReunion(reunion);
-    }
+    //endregion
 
 
+
+    //region ------ Popup de filtrage des réunions
+    /**
+     * Crée et affiche une fenêtre contextuelle (popup) pour filtrer les réunions.
+     *
+     * Cette méthode utilise un layout défini dans le fichier R.layout.popup_filter_reunion pour créer
+     * une fenêtre contextuelle affichant des options de filtrage telles que la sélection de dates,
+     * le choix d'heures, la sélection de salles de réunion, et des boutons d'action pour appliquer ou annuler le filtre.
+     *
+     * La fenêtre contextuelle est créée en utilisant un PopupWindow et est affichée en bas de l'écran.
+     * Un dialogue de sélection de plage de dates est inclus, ainsi que des spinners pour choisir les heures
+     * minimales et maximales, et une zone de texte multisélection pour choisir les salles de réunion.
+     * Les options de filtrage sont ensuite appliquées à l'aide des méthodes du ViewModel (reunionViewModel).
+     */
     private void createAndShowPopUpFilter(){
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View popupView = inflater.inflate(R.layout.popup_filter_reunion, null);
@@ -143,7 +160,6 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         textResultDate = popupView.findViewById(R.id.textResultDate);
         btnSelectDate = popupView.findViewById(R.id.btnSelectDate);
 
-        // TODO : ajouter un click listener
         btnSelectDate.setOnClickListener(view -> {
             getDatePickerDialog();
         });
@@ -161,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 
         // ----------------------- MULTISELECTION SALLE REUNION ----------------------
         MultiAutoCompleteTextView multiSelectRoom = popupView.findViewById(R.id.multiSelectRoom);
-        ArrayAdapter<String> adapterMultiSelect = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, reunionViewModel.findAllReunionsRoom());
+        ArrayAdapter<String> adapterMultiSelect = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, reunionViewModel.getUniqueMeetingRooms());
         multiSelectRoom.setAdapter(adapterMultiSelect);
         multiSelectRoom.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
 
@@ -171,12 +187,8 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         btnRetour = popupView.findViewById(R.id.buttonBackAction);
 
         btnFiltrer.setOnClickListener(view -> {
-            // récupérer la valeur de la date
             String startDate = startDateString;
             String endDate = endDateString;
-
-            Log.i("DEBUG", "intern clic filter, start = " + startDate);
-            Log.i("DEBUG", "intern calendar, end = " + endDate);
 
             String selectedRooms = String.valueOf(multiSelectRoom.getText());
             String minHourSelected = minHourSpinner.getSelectedItem().toString();
@@ -190,6 +202,15 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
         });
     }
 
+    /**
+     * Affiche une boîte de dialogue de sélection de plage de dates avec le composant MaterialDatePicker.
+     *
+     * Cette méthode crée et affiche une boîte de dialogue permettant à l'utilisateur
+     * de sélectionner une plage de dates. La plage sélectionnée est ensuite affichée dans
+     * un TextView avec le format "Du [date début] au [date fin]".
+     *
+     * Note : La méthode utilise le format de date "dd/MM/yyyy" en français.
+     **/
     private void getDatePickerDialog() {
 
         MaterialDatePicker.Builder<Pair<Long, Long>> builder = MaterialDatePicker.Builder.dateRangePicker();
@@ -222,4 +243,5 @@ public class MainActivity extends AppCompatActivity implements ItemClickListener
 
         datePicker.show(getSupportFragmentManager(), "DATE_PICKER");
     }
+    //endregion
 }

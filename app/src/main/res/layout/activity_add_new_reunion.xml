@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout  xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-
+    
     <data>
         <variable
             name="viewModel"
             type="com.example.p4_mareunion.viewmodel.ReunionViewModel" />
     </data>
-
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,28 +21,20 @@
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:datePickerMode="spinner"
-            android:calendarViewShown="false"
-            android:day="@={viewModel.dayInput}"
-            android:month="@={viewModel.monthInput}"
-            android:year="@={viewModel.yearInput}" />
+            android:calendarViewShown="false"/>
 
         <TimePicker
             android:id="@+id/timePickerReunion"
             android:layout_width="match_parent"
             android:layout_height="150dp"
-            android:timePickerMode="spinner"
-            android:hour="@={viewModel.hourInput}"
-            android:minute="@={viewModel.minuteInput}"/>
+            android:timePickerMode="spinner"/>
 
 
-
-        <MultiAutoCompleteTextView
-            android:id="@+id/multiSelectionRooms"
+        <Spinner
+            android:id="@+id/spinnerRoomsSelection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@={viewModel.localisationInput}"
-            android:hint="Salle de réunion"
-            android:completionThreshold="1"/>
+            android:layout_marginBottom="16dp"/>
 
         <EditText
             android:id="@+id/subjectReunionText"
@@ -53,33 +43,52 @@
             android:layout_marginBottom="16dp"
             android:ems="10"
             android:hint="Sujet de la réunion"
-            android:text="@={viewModel.subjectInput}"
             android:inputType="text"/>
 
         <MultiAutoCompleteTextView
-            android:id="@+id/multiAutoCompleteTextView"
+            android:id="@+id/multiSelectionParticipant"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@={viewModel.participantsInput}"
             android:hint="Liste des participants"
-            android:completionThreshold="1"/>
+            android:completionThreshold="1"
+            android:layout_marginBottom="16dp"/>
 
-
-
-        <TextView
-            android:id="@+id/saveButton"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/button_valide_shape"
-            android:padding="12dp"
-            android:text="Enregistrer"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textSize="16dp"
-            android:textStyle="bold"
-            android:onClick="addNewReunion" />
+            android:orientation="horizontal">
 
+            <TextView
+                android:id="@+id/saveButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_unfocus_shape"
+                android:padding="12dp"
+                android:layout_weight="1"
+                android:clickable="false"
+                android:text="Enregistrer"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                android:layout_marginEnd="8dp"/>
 
+            <TextView
+                android:id="@+id/backButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/button_valide_shape"
+                android:padding="12dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:text="Retour"
+                android:textAlignment="center"
+                android:layout_marginStart="8dp"
+                android:textColor="@color/white"
+                android:textSize="16dp"
+                android:textStyle="bold"/>
+
+        </LinearLayout>
     </LinearLayout>
 
 </layout>

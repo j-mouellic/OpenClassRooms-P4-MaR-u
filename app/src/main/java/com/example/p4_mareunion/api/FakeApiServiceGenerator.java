@@ -71,6 +71,9 @@ public class FakeApiServiceGenerator {
         return sampleParticpants;
     }
 
-
+    static List<String> generateRooms(){
+       String[] roomNames = {"Salle A", "Salle B", "Salle C", "Salle D", "Salle E", "Salle F", "Salle G"};
+       return Arrays.asList(roomNames);
+    }
 
 }
