@@ -1,27 +1,32 @@
 package com.example.p4_mareunion.model;
 
 import java.sql.Time;
+import java.util.Date;
 import java.util.List;
 
 public class Reunion {
-    private String localisation;
+    private String room;
     private Time time;
     private String subject;
+    private Date date;
     private List<String> participants;
 
-    public Reunion(String localisation, Time time, String subject, List<String> participants) {
-        this.localisation = localisation;
+    public Reunion(String room, Time time, String subject, List<String> participants, Date date) {
+        this.room = room;
         this.time = time;
         this.subject = subject;
         this.participants = participants;
+        this.date = date;
     }
 
-    public String getLocalisation() {
-        return localisation;
+    //region --------------------- Getters && Setters ------------------------
+
+    public String getRoom() {
+        return room;
     }
 
-    public void setLocalisation(String localisation) {
-        this.localisation = localisation;
+    public void setRoom(String localisation) {
+        this.room = room;
     }
 
     public Time getTime() {
@@ -47,4 +52,15 @@ public class Reunion {
     public void setParticipants(List<String> participants) {
         this.participants = participants;
     }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    //endregion ---------------------------------------------------------------
+
 }

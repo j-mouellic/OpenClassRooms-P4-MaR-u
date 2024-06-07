@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">p4-MaReunion</string>
+
+    <string name="subject">Sujet de la réunion</string>
+    <string name="participants">Liste des participants</string>
+    <string name="room">Salles disponibles</string>
+
+    <string name="date">Sélectionnez la date de la réunion</string>
+    <string name="hour">Sélectionnez l\'heure de la réunion</string>
+
+    <string name="hourMin">Sélectionnez l\'heure minimale</string>
+    <string name="hourMax">Sélectionnez l\'heure maximale</string>
+
+    <string name="btnBack">Retourner à la liste des réunions</string>
+    <string name="btnSave">Sauvegarder</string>
+
+    <!-- MENU -->
+    <string name="menu">Sélection des menus</string>
+    <string name="filter">Filtrer les réunions</string>
+    <string name="reinit">Réinitialiser la liste des réunions\n</string>
 </resources>

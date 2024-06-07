@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="colorPrimary">#4e92df</color>
+    <color name="colorPrimaryDark">#3f7abd</color>
+    <color name="red">#ce0a24</color>
+    <color name="white">#fff</color>
+    <color name="delete_icon">#3f445e</color>
+    <color name="black_text_bold">#2d2d2d</color>
+    <color name="grey_text_normal">#656565</color>
+    <color name="blue_palette_1">#edd9d0</color>
+    <color name="blue_palette_2">#aeceb8</color>
+    <color name="blue_palette_3">#8BB3A6</color>
+    <color name="blue_palette_4">#D0B6B7</color>
 </resources>
