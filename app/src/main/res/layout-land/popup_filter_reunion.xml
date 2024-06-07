@@ -1,88 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <RelativeLayout
-        android:id="@+id/popupFilterLayout"
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorPrimaryDark"
+        android:paddingHorizontal="48dp"
         android:gravity="bottom">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineLeft"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="24dp"
-            android:layout_margin="8dp"
             android:orientation="vertical"
-            android:background="@drawable/popup_bg">
+            app:layout_constraintGuide_percent="0.1"/>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.9"/>
+
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/popup_bg"
+            android:orientation="vertical"
+            android:padding="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineRight"
+            app:layout_constraintStart_toStartOf="@+id/guidelineLeft"
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/textView9"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
                 android:layout_weight="1"
-                android:textStyle="bold"
+                android:text="Trouvez votre Réunion"
+                android:textAlignment="center"
                 android:textColor="@color/black_text_bold"
                 android:textSize="24sp"
-                android:textAlignment="center"
-                android:layout_marginBottom="24dp"
-                android:text="Trouvez votre Réunion" />
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textViewDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="16sp"
                 android:layout_marginBottom="8dp"
-                android:text="Date : " />
+                android:layout_weight="1"
+                android:text="Date : "
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/textResultDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:textSize="16sp"
                 android:layout_marginBottom="8dp"
-                android:text="Du ... /... /... au ... /... /..." />
+                android:text="Du ... /... /... au ... /... /..."
+                android:textAlignment="center"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/btnSelectDate"
                 android:layout_width="match_parent"
-                android:textAlignment="center"
                 android:layout_height="wrap_content"
-                android:text="Sélectionner une date"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/button_valide_shape"
                 android:contentDescription="@string/date"
-                android:textColor="@color/white"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="4dp"
-                android:textSize="16sp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/button_valide_shape"/>
+                android:text="Sélectionner une date"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
 
             <View
                 android:id="@+id/divider3"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
+                android:layout_marginVertical="4dp"
                 android:layout_weight="1"
-                android:layout_marginVertical="16dp"
                 android:background="@color/black_text_bold" />
 
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textSize="16sp"
                 android:layout_marginBottom="8dp"
-                android:text="Tranche Horaire :" />
+                android:layout_weight="1"
+                android:text="Tranche Horaire :"
+                android:textSize="16sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginBottom="8dp"
                 android:layout_weight="1"
-                android:orientation="horizontal"
-                android:layout_marginBottom="8dp">
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/textView7"
@@ -96,7 +118,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:contentDescription="@string/hourMin"/>
+                    android:contentDescription="@string/hourMin" />
 
                 <TextView
                     android:id="@+id/textView8"
@@ -110,7 +132,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:contentDescription="@string/hourMax"/>
+                    android:contentDescription="@string/hourMax" />
 
 
             </LinearLayout>
@@ -119,8 +141,8 @@
                 android:id="@+id/divider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
+                android:layout_marginVertical="4dp"
                 android:layout_weight="1"
-                android:layout_marginVertical="16dp"
                 android:background="@color/black_text_bold" />
 
             <TextView
@@ -128,22 +150,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textSize="16sp"
-                android:text="Salle de réunion :" />
+                android:text="Salle de réunion :"
+                android:textSize="16sp" />
 
             <MultiAutoCompleteTextView
                 android:id="@+id/multiSelectRoom"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="salle B"
                 android:completionThreshold="1"
-                android:contentDescription="@string/room"/>
+                android:contentDescription="@string/room"
+                android:hint="salle B" />
 
             <LinearLayout
-                android:layout_marginTop="16dp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginTop="16dp"
                 android:layout_weight="1"
                 android:orientation="horizontal">
 
@@ -151,29 +173,30 @@
                     android:id="@+id/buttonBackAction"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAlignment="center"
                     android:layout_weight="1"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
+                    android:contentDescription="@string/btnBack"
                     android:text="Retour"
-                    android:contentDescription="@string/btnBack"/>
+                    android:textAlignment="center"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/buttonFilterAction"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAlignment="center"
                     android:layout_weight="1"
+                    android:background="@drawable/button_valide_shape"
+                    android:contentDescription="@string/btnSave"
+                    android:padding="4dp"
+                    android:text="Filtrer"
+                    android:textAlignment="center"
                     android:textColor="@color/white"
                     android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:padding="4dp"
-                    android:background="@drawable/button_valide_shape"
-                    android:text="Filtrer"
-                    android:contentDescription="@string/btnSave"/>
+                    android:textStyle="bold" />
             </LinearLayout>
 
 
         </LinearLayout>
-    </RelativeLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </layout>

@@ -8,8 +8,16 @@ import java.util.List;
 
 public interface ApiService {
     List<Reunion> getReunions();
-
     List<String> getParticipants();
-
     List<String> getRooms();
+    List<String> getSubjects();
+    List<String> getTimeSlots();
+
+    void deleteReunion(Reunion reunion);
+    void addReunion(Reunion reunion);
+
+    void addParticipants(List<String> participants);
+    void addParticipant(String participant);
+
+    void addSubject(String subject);
 }

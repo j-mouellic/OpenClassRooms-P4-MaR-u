@@ -1,32 +1,31 @@
 package com.example.p4_mareunion.repository;
 
-import static org.apache.commons.lang3.time.DateUtils.parseDate;
 
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.p4_mareunion.api.ApiService;
 import com.example.p4_mareunion.model.Reunion;
 
 import java.sql.Time;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 
 public class ReunionRepository {
 
     private final ApiService apiService;
     private static ReunionRepository instance;
-    private MutableLiveData<List<Reunion>> reunionList = new MutableLiveData<>();
-    private MutableLiveData<List<Reunion>> updatedListForReset = new MutableLiveData<>();
-    MutableLiveData<List<String>> participants = new MutableLiveData<>();
-    private List<Reunion> currentList, filteredList, savedList;
+    private MutableLiveData<List<Reunion>> reunions = new MutableLiveData<>();
+    private MutableLiveData<List<String>> participants = new MutableLiveData<>();
+    private List<Reunion> currentList;
+    private Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
 
 
     //region ---------------------- CONSTRUCTOR ---------------------
@@ -45,46 +44,43 @@ public class ReunionRepository {
         return instance;
     }
 
-    public MutableLiveData<List<Reunion>> getReunions(){
-        if (reunionList.getValue() == null){
-            reunionList.setValue(apiService.getReunions());
+    //region ------------------- CRUD METHODS ------------------
+    public LiveData<List<Reunion>> getReunions(){
+        if (reunions.getValue() == null){
+            reunions.setValue(apiService.getReunions());
         }
-        return reunionList;
+        return reunions;
     }
-
-    public MutableLiveData<List<String>> getParticipants() {
+    public LiveData<List<String>> getParticipants() {
         if (participants.getValue() == null){
             participants.setValue(apiService.getParticipants());
         }
         return participants;
     }
+    public List<String> getRooms(){ return apiService.getRooms(); }
+    public List<String> getTimeSlots(){ return apiService.getTimeSlots(); }
 
-
-
-    //region ------------------- CRUD METHODS ------------------
     public void deleteReunion(Reunion reunion){
-        currentList = reunionList.getValue();
-        currentList.remove(reunion);
-        reunionList.setValue(currentList);
-        updatedListForReset.setValue(currentList);
+        apiService.deleteReunion(reunion);
+        reunions.setValue(apiService.getReunions());
     }
 
-    public List<Reunion> resetListReunion(){
-        savedList = updatedListForReset.getValue();
-        return savedList;
+    public void addReunion(String room, Time time, String subject, List<String> participants,Date date){
+        if (time == null) {
+            time = getActualTime();
+        }
+        if (date == null){
+            date = getActualDate();
+        }
+
+        findNewParticipantEmail(participants);
+
+        Reunion reunion = new Reunion(room, time, subject, participants, date);
+        apiService.addReunion(reunion);
+        reunions.setValue(apiService.getReunions());
     }
 
-    public void addReunion(Reunion reunion){
-        currentList = reunionList.getValue();
-        List<String> listToCheck = reunion.getParticipants();
-        findNewParticipantEmail(listToCheck);
-        currentList.add(reunion);
-        reunionList.setValue(currentList);
-        updatedListForReset.setValue(currentList);
-    }
-    public List<String> getAllMeetingRooms(){
-        return apiService.getRooms();
-    }
+
     //endregion
 
 
@@ -98,25 +94,22 @@ public class ReunionRepository {
      * Cette LiveData est ensuite assignée à la variable reunionListLiveData pour être observée par les composants de l'interface utilisateur.
      */
     public List<String> filterUniqueMeetingRooms() {
-        currentList = reunionList.getValue();
+        currentList = reunions.getValue();
         Set<String> uniqueRooms = new HashSet<>();
         for (Reunion r : currentList) {
-            uniqueRooms.add(r.getLocalisation());
+            uniqueRooms.add(r.getRoom());
         }
-        Log.i("DEBUG ROOM", "" + uniqueRooms);
         return new ArrayList<>(uniqueRooms);
     }
 
 
-    /**
-     * Recherche de nouveaux emails parmi la liste spécifiée et les ajoute à la liste actuelle des participants.
+    /** --------------------- FIND NEW PARTICIPANT EMAIL -----------------------
+     * Finds and adds new participant email addresses to the current list.
      *
-     * Cette méthode prend en paramètre une liste d'emails à vérifier (listToCheck), puis récupère la liste actuelle
-     * des participants à partir de la LiveData (participants). Elle compare chaque email de la liste à vérifier avec
-     * la liste actuelle et ajoute les nouveaux emails (ceux qui ne sont pas déjà présents) à une nouvelle liste (newEmails).
-     * Enfin, la liste actuelle des participants est mise à jour en ajoutant les nouveaux emails, et la LiveData est mise à jour avec la nouvelle liste.
+     * This method checks a provided list of email addresses against the current list of participants.
+     * Any new email addresses found are added to the current list of participants.
      *
-     * @param listToCheck Liste d'emails à vérifier et à ajouter à la liste des participants.
+     * @param listToCheck The list of email addresses to check for new participants.
      */
     private void findNewParticipantEmail(List<String> listToCheck) {
         List<String> currentList = participants.getValue();
@@ -131,67 +124,25 @@ public class ReunionRepository {
     }
 
 
-    /**
-     * Filtre les réunions en fonction des critères spécifiés tels que la plage de dates, les heures minimales et maximales,
-     * et les salles de réunion sélectionnées.
+    /** --------------------- GET FREE ROOMS -----------------------
+     * Retrieves a list of available rooms for a given time and date.
      *
-     * Cette méthode prend en paramètres une plage de dates, des heures minimales et maximales, et une liste de salles de réunion.
-     * Elle parcourt la liste actuelle des réunions à partir de la LiveData (reunionList) et filtre les réunions en fonction
-     * des critères fournis. Les réunions qui correspondent aux critères sont ajoutées à une nouvelle liste (filteredList)
-     * qui est renvoyée en tant que résultat.
+     * If the time or date is not provided, the current time and date are used.
      *
-     * @param startDate Date de début de la plage de dates au format "dd/MM/yyyy".
-     * @param endDate Date de fin de la plage de dates au format "dd/MM/yyyy".
-     * @param minHour Heure minimale de la journée.
-     * @param maxHour Heure maximale de la journée.
-     * @param rooms Liste des salles de réunion sélectionnées.
-     * @return Liste des réunions filtrées en fonction des critères spécifiés.
+     * @param time The time for which to check room availability.
+     * @param date The date for which to check room availability.
+     * @return A list of available rooms.
      */
-    public List<Reunion> filterReunionByHourAndRoom(String startDate, String endDate, int minHour, int maxHour, List<String> rooms){
-        filteredList = new ArrayList<>();
-        currentList = reunionList.getValue();
-
-        for (Reunion reunion : currentList){
-            String reunionRoom = reunion.getLocalisation();
-            String reunionDate = reunion.getDate();
-            int reunionHour = reunion.getTime().getHours();
-
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-            Date reunionDateFormat, startDateFormat, endDateFormat;
-
-            try {
-                reunionDateFormat = sdf.parse(reunionDate);
-                startDateFormat = sdf.parse(startDate);
-                endDateFormat = sdf.parse(endDate);
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
-
-            if (reunionDateFormat.after(startDateFormat) && reunionDateFormat.before(endDateFormat)){
-                if (rooms.contains(reunionRoom)){
-                    if (reunionHour >= minHour && reunionHour <= maxHour){
-                        filteredList.add(reunion);
-                    }
-                }
-            }
+    public List<String> getFreeRooms(Time time, Date date){
+        if (time == null) {
+            time = getActualTime();
         }
-        return filteredList;
-    }
+        if (date == null){
+            date = getActualDate();
+        }
 
-    /**
-     * Recherche les salles de réunion occupées à un moment et une date spécifiques.
-     *
-     * Cette méthode prend en paramètres une heure, une date, et récupère la liste actuelle des réunions
-     * à partir de la LiveData (reunionList). Elle parcourt ensuite la liste des réunions et identifie les salles
-     * de réunion qui sont occupées à l'heure spécifiée et à la date donnée. Les noms des salles de réunion occupées
-     * sont ajoutés à une nouvelle liste (occupiedRooms) qui est renvoyée en tant que résultat.
-     *
-     * @param time Objet Time représentant l'heure pour laquelle la recherche de salles occupées est effectuée.
-     * @param date Date pour laquelle la recherche de salles occupées est effectuée au format "dd/MM/yyyy".
-     * @return Liste des noms des salles de réunion occupées à l'heure et la date spécifiées.
-     */
-    public List<String> findOccupiedRooms(Time time, String date){
-        List<Reunion> currentList = reunionList.getValue();
+        List<Reunion> currentList = reunions.getValue();
+        List<String> rooms = apiService.getRooms();
         List<String> occupiedRooms = new ArrayList<>();
 
         Calendar maxHour = Calendar.getInstance();
@@ -203,11 +154,25 @@ public class ReunionRepository {
 
         for (Reunion reunion : currentList){
             if (reunion.getDate().equals(date) && reunion.getTime().after(time) && reunion.getTime().before(maxHour.getTime())){
-                Log.i("ROOM", "salle occupée : " + reunion.getLocalisation());
-                occupiedRooms.add(reunion.getLocalisation());
+                Log.i("ROOM", "salle occupée : " + reunion.getRoom());
+                occupiedRooms.add(reunion.getRoom());
             }
         }
-        return occupiedRooms;
+        rooms.removeAll(occupiedRooms);
+        return rooms;
+    }
+    //endregion
+
+
+    //region ------------ GET ACTUAL TIME && DATE ------------
+    private Time getActualTime(){
+        int h = calendar.get(Calendar.HOUR_OF_DAY);
+        int m = calendar.get(Calendar.MINUTE);
+        return new Time(h, m, 0);
+    }
+
+    private Date getActualDate(){
+        return new Date();
     }
     //endregion
 }

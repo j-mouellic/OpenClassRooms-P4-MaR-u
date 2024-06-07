@@ -1,15 +1,15 @@
 package com.example.p4_mareunion;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -20,26 +20,35 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import com.example.p4_mareunion.databinding.ActivityAddNewReunionBinding;
 import com.example.p4_mareunion.viewmodel.ReunionViewModel;
+import com.example.p4_mareunion.viewmodel.ViewModelFactory;
 
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class AddNewReunionActivity extends AppCompatActivity {
-    private ActivityAddNewReunionBinding binding;
+
+    // DATA
     private ReunionViewModel reunionViewModel;
-    TimePicker timePicker;
-    DatePicker datePicker;
+
+    // VIEWS
     Spinner roomSpinner;
     EditText subjectInput;
     MultiAutoCompleteTextView multiSelectionParticipants;
-    TextView saveButton, backButton;
+    TextView saveButton, backButton, timePicker, datePicker;
+
+    // UTILS
+    Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Paris"));
+    Time reunion_time;
+    int year, month, day, currentHour, currentMinute;
     String meetingRoom;
+    Date reunion_date;
     Boolean subjectVerified = false;
     Boolean participantsVerfied = false;
 
@@ -47,70 +56,65 @@ public class AddNewReunionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_add_new_reunion);
 
         // ViewModel
-        reunionViewModel = new ViewModelProvider(this).get(ReunionViewModel.class);
-        reunionViewModel.init();
-
-        // Binding
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_add_new_reunion);
-        binding.setViewModel(reunionViewModel);
-        binding.setLifecycleOwner(this);
+        ViewModelFactory factory = new ViewModelFactory();
+        reunionViewModel = new ViewModelProvider(this, factory).get(ReunionViewModel.class);
 
         // ViewBinding
-        backButton = binding.backButton;
-        saveButton = binding.saveButton;
-        subjectInput = binding.subjectReunionText;
-        timePicker = binding.timePickerReunion;
-        datePicker = binding.datePickerReunion;
-        roomSpinner = binding.spinnerRoomsSelection;
-        multiSelectionParticipants = binding.multiSelectionParticipant;
+        backButton = findViewById(R.id.backButton);
+        saveButton = findViewById(R.id.saveButton);
+        subjectInput = findViewById(R.id.subjectReunionText);
+        timePicker = findViewById(R.id.time);
+        datePicker = findViewById(R.id.date);
+        roomSpinner = findViewById(R.id.spinnerRoomsSelection);
+        multiSelectionParticipants = findViewById(R.id.multiSelectionParticipant);
 
-        // Button
+        // Current Date && Current Time
+        year = calendar.get(Calendar.YEAR);
+        month = calendar.get(Calendar.MONTH);
+        day = calendar.get(Calendar.DAY_OF_MONTH);
+
+        currentHour = calendar.get(Calendar.HOUR_OF_DAY);
+        currentMinute = calendar.get(Calendar.MINUTE);
+
+        String current_date = new SimpleDateFormat("dd/MM/yyyy", Locale.FRENCH).format(calendar.getTime());
+        Time current_time = new Time(currentHour, currentMinute, 0);
+        String timeString = new SimpleDateFormat("HH:mm", Locale.FRENCH).format(current_time);
+
+        datePicker.setText(current_date);
+        timePicker.setText(timeString);
+
+
+        // Click Events
+        timePicker.setOnClickListener(view -> {
+            setTimePicker();
+        });
+
+        datePicker.setOnClickListener(view -> {
+            setDatePicker();
+        });
+
         backButton.setOnClickListener(view -> {
             backToMainActivity();
         });
 
 
+        //region ---------- SpinnerRoom Configuration ----------
 
-        //region TimePicker / DatePicker Configuration
-        timePicker.setIs24HourView(true);
-        timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
-            @Override
-            public void onTimeChanged(TimePicker timePicker, int i, int i1) {
-                reunionViewModel.getFreeRooms(getTimeInput(), getDateInput());
-            }
-        });
-
-        // DatePicker Configuration
-        datePicker.setMinDate(System.currentTimeMillis() - 1000);
-        datePicker.init(
-                datePicker.getYear(),
-                datePicker.getMonth(),
-                datePicker.getDayOfMonth(),
-                new DatePicker.OnDateChangedListener() {
-                    @Override
-                    public void onDateChanged(DatePicker datePicker, int i, int i1, int i2) {
-                        reunionViewModel.getFreeRooms(getTimeInput(), getDateInput());
-                    }
-                }
-        );
-        //endregion
-
-        //region ----- SpinnerRoom Configuration
         ArrayAdapter<String> adapterRooms = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-        reunionViewModel.getFreeRooms(getTimeInput(), getDateInput()).observe(this, new Observer<List<String>>() {
-            @Override
-            public void onChanged(List<String> rooms) {
-                Log.i("ROOM", "liste transmise : " + rooms.toString());
-                adapterRooms.clear();
-                for (String room : rooms){
-                    adapterRooms.add(room);
-                }
-                adapterRooms.notifyDataSetChanged();
+
+        reunionViewModel.getFreeRooms(reunion_time, reunion_date).observe(this, rooms -> {
+            adapterRooms.clear();
+            for (String room : rooms){
+                adapterRooms.add(room);
             }
+            adapterRooms.notifyDataSetChanged();
         });
+
         roomSpinner.setAdapter(adapterRooms);
+
         roomSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
             @Override
@@ -125,7 +129,10 @@ public class AddNewReunionActivity extends AppCompatActivity {
         });
         //endregion
 
-        //region ----- Subject Input Configuration
+
+
+        //region ---------- Subject Input Configuration ----------
+
         subjectInput.setError("Indiquer un sujet de réunion");
         subjectInput.addTextChangedListener(new TextWatcher() {
             @Override
@@ -137,10 +144,10 @@ public class AddNewReunionActivity extends AppCompatActivity {
                if (charSequence.length() >= 3 ){
                    subjectInput.setError(null, null);
                    subjectVerified = true;
-                   enableSavingMeeting();
+                   checkForenableSavingMeeting();
                }else {
                    subjectVerified = false;
-                   enableSavingMeeting();
+                   checkForenableSavingMeeting();
                    subjectInput.setError("Indiquer un sujet de réunion");
                }
             }
@@ -153,9 +160,10 @@ public class AddNewReunionActivity extends AppCompatActivity {
         //endregion
 
 
-        //region ----- MultiSelection Participants Configuration
+        //region ---------- MultiSelection Participants Configuration ----------
+
         ArrayAdapter<String> adapterParticipants = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1);
-        reunionViewModel.getAllParticipants().observe(this, new Observer<List<String>>() {
+        reunionViewModel.getParticipants().observe(this, new Observer<List<String>>() {
             @Override
             public void onChanged(List<String> participants) {
                 adapterParticipants.clear();
@@ -169,7 +177,7 @@ public class AddNewReunionActivity extends AppCompatActivity {
         multiSelectionParticipants.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
         multiSelectionParticipants.setError("Indiquez des participants");
         multiSelectionParticipants.addTextChangedListener(new TextWatcher() {
-            @Override
+                @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
             }
@@ -179,21 +187,14 @@ public class AddNewReunionActivity extends AppCompatActivity {
                 String emailsText = charSequence.toString().trim();
                 String[] emails = emailsText.split(",");
 
-                if (charSequence.length() <= 13){
-                    multiSelectionParticipants.setError("Notez des emails Lamzone");
-                    participantsVerfied = false;
-                    enableSavingMeeting();
-                }else{
-                    multiSelectionParticipants.setError(null, null);
-                    for (String email : emails) {
-                        if (!reunionViewModel.isValidEmail(email.trim())) {
-                            multiSelectionParticipants.setError("Format requis : xxx@lamzone.com");
-                            participantsVerfied = false;
-                            enableSavingMeeting();
-                        }else{
-                            participantsVerfied = true;
-                            enableSavingMeeting();
-                        }
+                for (String email : emails) {
+                    if (!isValidEmail(email.trim())) {
+                        multiSelectionParticipants.setError("Format requis : xxx@lamzone.com");
+                        participantsVerfied = false;
+                        checkForenableSavingMeeting();
+                    }else{
+                        participantsVerfied = true;
+                        checkForenableSavingMeeting();
                     }
                 }
             }
@@ -203,29 +204,58 @@ public class AddNewReunionActivity extends AppCompatActivity {
 
             }
         });
-        //endregion
+    }
+    //endregion
+
+
+    //region ---------- 📅 Zone Date et Time picker ⌚ ----------
+    private void setDatePicker(){
+        DatePickerDialog dialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker picker, int year, int month, int day) {
+
+                calendar.set(Calendar.YEAR, year);
+                calendar.set(Calendar.MONTH, month);
+                calendar.set(Calendar.DAY_OF_MONTH, day);
+
+                Date reunion_date = calendar.getTime();
+
+                // reunion_date = new SimpleDateFormat("dd/MM/yyyy", Locale.FRENCH).format(calendar.getTime());
+
+                reunionViewModel.getFreeRooms(reunion_time, reunion_date);
+
+                String dateString = new SimpleDateFormat("dd/MM/yyyy", Locale.FRENCH).format(reunion_date);
+                datePicker.setText(dateString);
+            }
+        }, year, month, day);
+        dialog.show();
     }
 
-    public void backToMainActivity(){
-        Intent backActivity = new Intent(this, ReunionListActivity.class);
-        this.startActivity(backActivity);
+    private void setTimePicker(){
+        TimePickerDialog dialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker picker, int hour, int minute) {
+                reunion_time =  new Time(hour, minute, 0);
+
+                reunionViewModel.getFreeRooms(reunion_time, reunion_date);
+
+                String reunion_hour = new SimpleDateFormat("HH:mm", Locale.FRENCH).format(reunion_time);
+                timePicker.setText(reunion_hour);
+            }
+        }, currentHour, currentMinute, true);
+        dialog.show();
     }
+    //endregion
 
-    /** ------------------------------------ addNewReunion ------------------------------------
-     * Ajoute une nouvelle réunion en utilisant les données fournies par les entrées de l'utilisateur.
-     *
-     * Cette méthode récupère l'heure, le sujet, la date, les participants et la salle de réunion à partir des entrées de l'utilisateur,
-     * puis utilise le ViewModel de la réunion (reunionViewModel) pour ajouter la nouvelle réunion.
-     *
-     * Enfin, elle lance une intention (Intent) pour retourner à l'écran principal (MainActivity).
-     **/
 
+    /**-------------------------- ADD NEW REUNION --------------------------------
+     * Adds a new reunion using user input data.
+     *
+     * This method retrieves subject, participants, and room information from user input,
+     * adds the new reunion using the ViewModel, and navigates back to the home list.
+     */
     public void addNewReunion(){
-        Time time = getTimeInput();
-
         String subject = subjectInput.getText().toString();
-
-        String date = getDateInput();
 
         String[] participantsFromInput = multiSelectionParticipants.getText().toString().split(",");
         List<String> participants = new ArrayList<>();
@@ -235,21 +265,20 @@ public class AddNewReunionActivity extends AppCompatActivity {
 
         String room = meetingRoom;
 
-        reunionViewModel.addReunion(room, time, subject, participants, date);
+        reunionViewModel.addReunion(room, reunion_time, subject, participants, reunion_date);
 
         Intent backToHomeList = new Intent(this, ReunionListActivity.class);
         this.startActivity(backToHomeList);
     }
 
-    /** -------------------------- enableSavingMeeting --------------------------------
-     * Active ou désactive l'enregistrement d'une réunion en fonction de la vérification
-     * de la présence des participants dans l'input et de la présence d'un sujet dans l'input.
+    /** -------------------------- ENABLE SAVING MEETING --------------------------------
+     * Checks conditions for enabling saving a meeting.
      *
-     * La réunion peut être enregistrée uniquement si les participants et le sujet sont vérifiés.
-     *
-     * Une fois les deux conditions vérifiées, le bouton de sauvegarde devient actif.
+     * This method checks if participants and subject are verified.
+     * If verified, it enables the save button and sets a click listener to add a new reunion.
+     * If not verified, it disables the save button.
      * **/
-    private void enableSavingMeeting(){
+    private void checkForenableSavingMeeting(){
         if (participantsVerfied && subjectVerified){
             saveButton.setBackgroundResource(R.drawable.button_valide_shape);
             saveButton.setClickable(true);
@@ -263,37 +292,14 @@ public class AddNewReunionActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Récupère les informations d'heure à partir des composants de sélection de l'heure.
-     *
-     * Cette méthode extrait l'heure et les minutes actuelles du TimePicker et retourne un objet Time correspondant.
-     *
-     * @return Un objet Time représentant l'heure sélectionnée.
-     */
-    private Time getTimeInput(){
-        int timeHour = timePicker.getCurrentHour();
-        int timeMinute = timePicker.getCurrentMinute();
-        return new Time(timeHour, timeMinute, 0);
+    public boolean isValidEmail(String email) {
+        String emailPattern = "^[a-zA-Z0-9]+@lamzone\\.com$";
+        return email.matches(emailPattern);
     }
 
-    /**
-     * Récupère les informations de date à partir des composants de sélection de la date.
-     *
-     * Cette méthode extrait le jour, le mois et l'année actuels du DatePicker,
-     * puis les utilise pour créer une chaîne de date au format "dd/MM/yyyy" en français.
-     *
-     * @return Une chaîne de date au format "dd/MM/yyyy".
-     */
-    private String getDateInput(){
-        int dayDate = datePicker.getDayOfMonth();
-        int monthDate = datePicker.getMonth();
-        int yearDate = datePicker.getYear();
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, yearDate);
-        calendar.set(Calendar.MONTH, monthDate);
-        calendar.set(Calendar.DAY_OF_MONTH, dayDate);
-
-        return new SimpleDateFormat("dd/MM/yyyy", Locale.FRENCH).format(calendar.getTime());
+    private void backToMainActivity(){
+        Intent backActivity = new Intent(this, ReunionListActivity.class);
+        this.startActivity(backActivity);
     }
+
 }

@@ -14,13 +14,14 @@
         <activity
             android:name=".AddNewReunionActivity"
             android:exported="false"
-            android:theme="@style/AppThemeWithoutActionBar"/>
+            android:theme="@style/AppThemeWithoutActionBar" />
         <activity
             android:name=".ReunionListActivity"
-            android:theme="@style/AppTheme"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
