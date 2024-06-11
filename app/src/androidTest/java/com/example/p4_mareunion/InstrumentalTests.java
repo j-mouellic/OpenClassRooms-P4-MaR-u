@@ -4,7 +4,6 @@ import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
-import static androidx.test.espresso.action.ViewActions.pressImeActionButton;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.action.ViewActions.scrollTo;
 import static androidx.test.espresso.matcher.ViewMatchers.assertThat;
@@ -20,7 +19,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsNull.notNullValue;
 
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -32,6 +30,7 @@ import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 import androidx.test.rule.ActivityTestRule;
 
+import com.example.p4_mareunion.ui.ReunionListActivity;
 import com.example.p4_mareunion.utils.DeleteViewAction;
 
 import org.hamcrest.Description;

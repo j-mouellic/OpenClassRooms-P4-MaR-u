@@ -93,7 +93,7 @@ public class ReunionViewModel extends ViewModel {
 
         //Reunion Filter
         filteredReunions.addSource(reunion_filter, reunionFilter -> {
-            List<Reunion> reunionList = reunions.getValue(); // Valeur du repo à récupérer -- filteredReunions.getValue()
+            List<Reunion> reunionList = reunions.getValue();
             if (reunionList != null) {
                 List<Reunion> filteredList = applyFilter(reunionList);
                 filteredReunions.setValue(filteredList);
