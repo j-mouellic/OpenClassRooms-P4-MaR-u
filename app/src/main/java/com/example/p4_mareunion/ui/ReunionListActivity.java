@@ -1,10 +1,9 @@
-package com.example.p4_mareunion;
+package com.example.p4_mareunion.ui;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.util.Pair;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Observer;
@@ -15,35 +14,21 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Choreographer;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.MultiAutoCompleteTextView;
-import android.widget.PopupWindow;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.p4_mareunion.R;
 import com.example.p4_mareunion.databinding.ActivityMainBinding;
 import com.example.p4_mareunion.eventListener.ItemClickListener;
 import com.example.p4_mareunion.model.Reunion;
+import com.example.p4_mareunion.ui.AddNewReunionActivity;
+import com.example.p4_mareunion.ui.PopupFilter;
 import com.example.p4_mareunion.ui.ReunionListAdapter;
 import com.example.p4_mareunion.viewmodel.ReunionViewModel;
 //import com.example.p4_mareunion.viewmodel.ViewModelFactory;
 import com.example.p4_mareunion.viewmodel.ViewModelFactory;
-import com.google.android.material.datepicker.CalendarConstraints;
-import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 

@@ -1,4 +1,4 @@
-package com.example.p4_mareunion;
+package com.example.p4_mareunion.ui;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
@@ -17,6 +17,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.util.Pair;
 import androidx.fragment.app.FragmentManager;
 
+import com.example.p4_mareunion.R;
 import com.example.p4_mareunion.viewmodel.ReunionFilter;
 import com.example.p4_mareunion.viewmodel.ReunionViewModel;
 import com.google.android.material.datepicker.CalendarConstraints;

@@ -1,4 +1,4 @@
-package com.example.p4_mareunion;
+package com.example.p4_mareunion.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
@@ -20,6 +20,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.example.p4_mareunion.R;
 import com.example.p4_mareunion.viewmodel.ReunionViewModel;
 import com.example.p4_mareunion.viewmodel.ViewModelFactory;
 
@@ -219,8 +220,6 @@ public class AddNewReunionActivity extends AppCompatActivity {
                 calendar.set(Calendar.DAY_OF_MONTH, day);
 
                 Date reunion_date = calendar.getTime();
-
-                // reunion_date = new SimpleDateFormat("dd/MM/yyyy", Locale.FRENCH).format(calendar.getTime());
 
                 reunionViewModel.getFreeRooms(reunion_time, reunion_date);
 
